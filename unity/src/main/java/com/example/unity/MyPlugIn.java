@@ -25,11 +25,11 @@ public class MyPlugIn {
     public void setContext (Context unityContext){
         Log.d(TAG, "setContext: set");
         context=unityContext;
+        mqttHelper=new MQTTHelper(context);
         connect();
     }
 
     private void connect(){
-        mqttHelper=new MQTTHelper(context);
         mqttHelper.setCallback(new MqttCallbackExtended() {
             @Override
             public void connectComplete(boolean reconnect, String serverURI) {
@@ -52,11 +52,11 @@ public class MyPlugIn {
 
             }
         });
-        mqttHelper.subscribeToTopic();
+//        mqttHelper.subscribeToTopic();
     }
 
     private void publish(){
-        mqttHelper.toPublish();
+            mqttHelper.toPublish();
     }
 
     private void setTopic(String s){

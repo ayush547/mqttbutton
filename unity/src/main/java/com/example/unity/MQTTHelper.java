@@ -1,7 +1,12 @@
 package com.example.unity;
+import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
+import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions;
@@ -15,17 +20,13 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.io.UnsupportedEncodingException;
 
-public class MQTTHelper {
+public class MQTTHelper extends Service {
     public MqttAndroidClient mqttAndroidClient;
-    //final String ServerUri = "tcp://192.168.137.251:1883";
-    final String ServerUri = "tcp://broker.hivemq.com:1883";
+    final String ServerUri = "tcp://192.168.137.251:1883";
     final String clientId = "ExampleAndroidClient";
-    //final String subscriptionTopic = "cmnd/sw1/POWER1";
-    String subscriptionTopic = "foo/bar";
+    String subscriptionTopic = "cmnd/sw1/POWER1";
     String changeSwitch="OFF";
-    //final String username = "hqnetbea";
-    //final String password = "oHcizBy0VFdh";
-    Context context;
+    Context mcontext;
     boolean isOn=false;
     private static final String TAG = "MyPlugIn";
 
@@ -35,8 +36,8 @@ public class MQTTHelper {
         subscribeToTopic();
     }
 
-    public MQTTHelper(final Context context) {
-        this.context= context;
+    public MQTTHelper(Context context) {
+        this.mcontext= context;
         mqttAndroidClient = new MqttAndroidClient(context, ServerUri, clientId);
         mqttAndroidClient.setCallback(new MqttCallbackExtended() {
             @Override
@@ -46,7 +47,7 @@ public class MQTTHelper {
 
             @Override
             public void connectionLost(Throwable cause) {
-                Toast.makeText(context, "Connection_lost", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mcontext, "Connection_lost", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -69,9 +70,6 @@ public class MQTTHelper {
         MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
         mqttConnectOptions.setAutomaticReconnect(true);
         mqttConnectOptions.setCleanSession(false);
-        //  mqttConnectOptions.setUserName(username);
-        // mqttConnectOptions.setPassword(password.toCharArray());
-
         try {
 
             mqttAndroidClient.connect(mqttConnectOptions, null, new IMqttActionListener() {
@@ -84,7 +82,7 @@ public class MQTTHelper {
                     disconnectedBufferOptions.setPersistBuffer(false);
                     disconnectedBufferOptions.setDeleteOldestMessages(false);
                     mqttAndroidClient.setBufferOpts(disconnectedBufferOptions);
-                    // Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
+                    subscribeToTopic();
                 }
 
                 @Override
@@ -115,7 +113,7 @@ public class MQTTHelper {
             });
 
         } catch (MqttException ex) {
-            System.err.println("Exceptionst subscribing");
+            System.err.println("Exception subscribing");
             ex.printStackTrace();
         }
     }
@@ -128,10 +126,7 @@ public class MQTTHelper {
         else
         {changeSwitch="ON";
             isOn=!isOn;}
-        //byte[] encodedpayload = new byte[0];
         try {
-            //   encodedpayload = payload.getBytes("UTF-8");
-            //   MqttMessage message = new MqttMessage(encodedpayload);
             mqttAndroidClient.publish(subscriptionTopic, changeSwitch.getBytes(),0,true);
         } catch ( MqttException e) {
             e.printStackTrace();
@@ -139,4 +134,9 @@ public class MQTTHelper {
     }
 
 
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
 }

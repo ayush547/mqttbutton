@@ -4,6 +4,9 @@ buildscript {
     repositories {
         google()
         jcenter()
+        maven {
+            url "https://repo.eclipse.org/content/repositories/paho-snapshots/"
+        }
         
     }
     dependencies {
@@ -13,14 +16,22 @@ buildscript {
         // in the individual module build.gradle files
     }
 }
+repositories {
+    maven {
+        url "https://repo.eclipse.org/content/repositories/paho-snapshots/"
+    }
+}
 
 allprojects {
     repositories {
         google()
         jcenter()
-        
+        maven {
+            url "https://repo.eclipse.org/content/repositories/paho-releases/"
+        }
     }
 }
+
 
 task clean(type: Delete) {
     delete rootProject.buildDir
